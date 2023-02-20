@@ -1,44 +1,42 @@
 import { Injectable } from '@nestjs/common';
-import { AlbumDatabaseService } from 'src/database/albumDatabase.service';
-import { ArtistDatabaseService } from 'src/database/artistDatabase.service';
-import { FavoriteDatabaseService } from 'src/database/favoriteDatabase.service';
-import { TrackDatabaseService } from 'src/database/trackDatabase.service';
-import { uuid4 } from 'src/utils/uuid4create';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { Artist } from './entities/artist.entity';
 
 @Injectable()
 export class ArtistService {
   constructor(
-    private readonly artistDB: ArtistDatabaseService,
-    private readonly trackDB: TrackDatabaseService,
-    private readonly albumDB: AlbumDatabaseService,
-    private readonly favDB: FavoriteDatabaseService,
+    @InjectRepository(Artist)
+    private readonly artistRepository: Repository<Artist>,
   ) {}
 
-  async create(createArtistDto: CreateArtistDto) {
-    const entity = { ...createArtistDto, id: await uuid4() };
-    this.artistDB.create(entity);
-    return entity;
+  async create(dto: CreateArtistDto) {
+    return this.artistRepository.save(this.artistRepository.create(dto));
   }
 
   findAll() {
-    return this.artistDB.findAll();
+    return this.artistRepository.find();
   }
 
   findOne(id: string) {
-    return this.artistDB.findOne(id);
+    return this.artistRepository.findOneBy({ id });
   }
 
   update(id: string, updateArtistDto: UpdateArtistDto) {
-    return this.artistDB.update(id, updateArtistDto);
+    return this.artistRepository.save({
+      id,
+      ...this.artistRepository.create(updateArtistDto),
+    });
   }
 
   async remove(id: string) {
-    await this.favDB.removeArtist(id);
+    // await this.favDB.removeArtist(id);
     // https://github.com/rolling-scopes-school/nodejs-course-template/pull/73
     // await this.albumDB.removeArtist(id);
-    await this.trackDB.removeArtist(id);
-    return this.artistDB.remove(id);
+    // await this.trackDB.removeArtist(id);
+    return this.artistRepository.delete(id);
   }
 }

@@ -63,7 +63,7 @@ export class FavoriteController {
     return this.favoriteService.removeAlbum(id);
   }
 
-  // ==== ARTISTS ====
+  // // ==== ARTISTS ====
   @Post('/artist/:id')
   async addArtist(@Param() { id }: UUID4) {
     if (!(await this.favoriteService.existsArtistEntity(id))) {

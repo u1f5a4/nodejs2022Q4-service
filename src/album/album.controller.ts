@@ -40,7 +40,7 @@ export class AlbumController {
 
   @Put(':id')
   async update(@Param() { id }: UUID4, @Body() updateAlbumDto: UpdateAlbumDto) {
-    if ((await this.albumService.findOne(id)) === undefined) {
+    if (!(await this.albumService.findOne(id))) {
       throw new HttpException('Album not found', StatusCodes.NOT_FOUND);
     }
     return this.albumService.update(id, updateAlbumDto);
@@ -49,7 +49,7 @@ export class AlbumController {
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
   async remove(@Param() { id }: UUID4) {
-    if ((await this.albumService.findOne(id)) === undefined) {
+    if (!(await this.albumService.findOne(id))) {
       throw new HttpException('Album not found', StatusCodes.NOT_FOUND);
     }
     return this.albumService.remove(id);

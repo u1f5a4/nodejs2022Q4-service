@@ -1,78 +1,103 @@
 import { Injectable } from '@nestjs/common';
-import { AlbumDatabaseService } from 'src/database/albumDatabase.service';
-import { ArtistDatabaseService } from 'src/database/artistDatabase.service';
-import { FavoriteDatabaseService } from 'src/database/favoriteDatabase.service';
-import { TrackDatabaseService } from 'src/database/trackDatabase.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { Album } from 'src/album/entities/album.entity';
+import { Artist } from 'src/artist/entities/artist.entity';
+import { Track } from 'src/track/entities/track.entity';
+import { Favorite } from './entities/favorite.entity';
+
+const ALL_FAVORITES = 1;
 
 @Injectable()
 export class FavoriteService {
   constructor(
-    private readonly favDB: FavoriteDatabaseService,
-    private readonly trackDB: TrackDatabaseService,
-    private readonly albumDB: AlbumDatabaseService,
-    private readonly artistDB: ArtistDatabaseService,
+    @InjectRepository(Favorite)
+    private readonly favRepository: Repository<Favorite>,
+    @InjectRepository(Track)
+    private readonly trackRepository: Repository<Track>,
+    @InjectRepository(Album)
+    private readonly albumRepository: Repository<Album>,
+    @InjectRepository(Artist)
+    private readonly artistRepository: Repository<Artist>,
   ) {}
 
   async findAll() {
-    const { artists, albums, tracks } = await this.favDB.findAll();
-
-    return {
-      artists: await Promise.all(
-        artists.map((id) => this.artistDB.findOne(id)),
-      ),
-      albums: await Promise.all(albums.map((id) => this.albumDB.findOne(id))),
-      tracks: await Promise.all(tracks.map((id) => this.trackDB.findOne(id))),
-    };
+    return await this.favRepository.findOne({
+      where: { id: ALL_FAVORITES },
+      relations: {
+        artists: true,
+        albums: true,
+        tracks: true,
+      },
+    });
   }
 
-  // ==== TRACKS ====
-  addTrack(id: string) {
-    return this.favDB.addTrack(id);
+  // ==== Track ====
+  async addTrack(id: string) {
+    const favs = await this.findAll();
+    console.log(favs);
+
+    favs.tracks = [...favs.tracks, { id } as Track];
+    return this.favRepository.save({ ...favs });
   }
 
   existsTrackEntity(id: string) {
-    return this.trackDB.findOne(id);
+    return this.trackRepository.findOneBy({ id });
   }
 
-  findTrack(id: string) {
-    return this.favDB.findTrack(id);
+  async findTrack(id: string) {
+    const favs = await this.findAll();
+    return favs.tracks.some((track) => track.id === id);
   }
 
-  removeTrack(id: string) {
-    return this.favDB.removeTrack(id);
+  async removeTrack(id: string) {
+    const favs = await this.findAll();
+    favs.tracks = favs.tracks.filter((track) => track.id !== id);
+    return this.favRepository.save({ ...favs });
   }
 
-  // ==== ALBUMS ====
-  addAlbum(id: string) {
-    return this.favDB.addAlbum(id);
+  // ==== Album ====
+  async addAlbum(id: string) {
+    const favs = await this.findAll();
+    favs.albums = [...favs.albums, { id } as Album];
+    return this.favRepository.save({ ...favs });
   }
 
   existsAlbumEntity(id: string) {
-    return this.albumDB.findOne(id);
+    return this.albumRepository.findOneBy({ id });
   }
 
-  findAlbum(id: string) {
-    return this.favDB.findAlbum(id);
+  async findAlbum(id: string) {
+    const favs = await this.findAll();
+    return favs.albums.some((album) => album.id === id);
   }
 
-  removeAlbum(id: string) {
-    return this.favDB.removeAlbum(id);
+  async removeAlbum(id: string) {
+    const favs = await this.findAll();
+    favs.albums = favs.albums.filter((album) => album.id !== id);
+    return this.favRepository.save({ ...favs });
   }
 
-  // ==== ARTISTS ====
-  addArtist(id: string) {
-    return this.favDB.addArtist(id);
+  // ==== Artist ====
+  async addArtist(id: string) {
+    const favs = await this.findAll();
+    favs.artists = [...favs.artists, { id } as Artist];
+    return this.favRepository.save({ ...favs });
   }
 
   existsArtistEntity(id: string) {
-    return this.artistDB.findOne(id);
+    return this.artistRepository.findOneBy({ id });
   }
 
-  findArtist(id: string) {
-    return this.favDB.findArtist(id);
+  async findArtist(id: string) {
+    const favs = await this.findAll();
+    return favs.artists.some((artist) => artist.id === id);
   }
 
-  removeArtist(id: string) {
-    return this.favDB.removeArtist(id);
+  async removeArtist(id: string) {
+    const favs = await this.findAll();
+    favs.artists = favs.artists.filter((artist) => artist.id !== id);
+    return this.favRepository.save({ ...favs });
   }
 }

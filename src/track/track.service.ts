@@ -1,40 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { FavoriteDatabaseService } from 'src/database/favoriteDatabase.service';
-import { TrackDatabaseService } from 'src/database/trackDatabase.service';
-import { uuid4 } from 'src/utils/uuid4create';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { Track } from './entities/track.entity';
 
 @Injectable()
 export class TrackService {
   constructor(
-    private readonly trackDB: TrackDatabaseService,
-    private readonly favDB: FavoriteDatabaseService,
+    @InjectRepository(Track)
+    private readonly trackRepository: Repository<Track>,
   ) {}
 
-  async create(createTrackDto: CreateTrackDto) {
-    const entity = {
-      id: await uuid4(),
-      ...createTrackDto,
-    };
-    await this.trackDB.create(entity);
-    return entity;
+  async create(dto: CreateTrackDto) {
+    return this.trackRepository.save(this.trackRepository.create(dto));
   }
 
   findAll() {
-    return this.trackDB.findAll();
+    return this.trackRepository.find();
   }
 
   findOne(id: string) {
-    return this.trackDB.findOne(id);
+    return this.trackRepository.findOneBy({ id });
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
-    return this.trackDB.update(id, updateTrackDto);
+  update(id: string, dto: UpdateTrackDto) {
+    return this.trackRepository.save({
+      id,
+      ...dto,
+    });
   }
 
   async remove(id: string) {
-    await this.favDB.removeTrack(id);
-    return this.trackDB.remove(id);
+    // await this.favDB.removeTrack(id);
+    // return this.trackDB.remove(id);
+    return this.trackRepository.delete(id);
   }
 }
