@@ -36,8 +36,6 @@ export class FavoriteService {
   // ==== Track ====
   async addTrack(id: string) {
     const favs = await this.findAll();
-    console.log(favs);
-
     favs.tracks = [...favs.tracks, { id } as Track];
     return this.favRepository.save({ ...favs });
   }
