@@ -11,6 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
+    "start:dev-local": "cross-env DB_HOST=localhost npm run start:dev",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -20,7 +21,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "scan": "npm audit",
-    "typeorm:cli": "npx ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm -d ./src/database/data-source.config.ts"
+    "typeorm:cli": "npx ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm -d ./src/database/data-source.config.ts",
+    "typeorm:cli-local": "cross-env DB_HOST=localhost && npm run typeorm:cli"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",
