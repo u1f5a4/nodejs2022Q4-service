@@ -8,8 +8,6 @@ import {
   Put,
   HttpException,
   HttpCode,
-  UseInterceptors,
-  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { StatusCodes } from 'http-status-codes';
 
@@ -23,7 +21,6 @@ import { UUID4 } from 'src/utils/UUID4';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
@@ -32,11 +29,9 @@ export class UserController {
   @Get()
   async findAll() {
     const users = await this.userService.findAll();
-    users.forEach((user) => delete user.password);
     return users;
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
   async findOne(@Param() { id }: UUID4) {
     const user = await this.userService.findOne(id);
@@ -46,7 +41,6 @@ export class UserController {
     return user;
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @Put(':id')
   async updatePassword(
     @Param() { id }: UUID4,

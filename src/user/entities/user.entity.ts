@@ -44,4 +44,14 @@ export class User {
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
   }
+
+  toJSON() {
+    return {
+      id: this.id,
+      login: this.login,
+      version: this.version,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 }
