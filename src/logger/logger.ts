@@ -25,14 +25,15 @@ export class Logger {
   }
 
   send(level: string, message: string) {
-    if (!this.level.includes(level))
+    if (this.level.includes(level.toLowerCase()))
       this.write(`${new Date().toLocaleTimeString()} ${level} ${message}\n`);
-    // console.log(new Date().toLocaleString(), message);
   }
 
   write(message: string) {
     const files = fs.readdirSync(this.folder);
-    const lastFile = files[files.length - 1];
+    const lastFile = files
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+      .at(-1);
 
     const isLastFileTooBig = lastFile
       ? fs.statSync(path.join(this.folder, lastFile)).size / 1024 >=
